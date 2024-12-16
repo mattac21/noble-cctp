@@ -17,11 +17,15 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 func CmdReplaceMessage() *cobra.Command {
@@ -36,12 +40,17 @@ func CmdReplaceMessage() *cobra.Command {
 				return err
 			}
 
+			destinationCaller, err := parseAddress(args[3])
+			if err != nil {
+				return fmt.Errorf("invalid destination caller: %w", err)
+			}
+
 			msg := &types.MsgReplaceMessage{
 				From:                 clientCtx.GetFromAddress().String(),
-				OriginalMessage:      []byte(args[0]),
-				OriginalAttestation:  []byte(args[1]),
-				NewMessageBody:       []byte(args[2]),
-				NewDestinationCaller: []byte(args[3]),
+				OriginalMessage:      common.FromHex(args[0]),
+				OriginalAttestation:  common.FromHex(args[1]),
+				NewMessageBody:       common.FromHex(args[2]),
+				NewDestinationCaller: destinationCaller,
 			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)

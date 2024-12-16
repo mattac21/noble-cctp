@@ -17,10 +17,13 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
 
@@ -36,12 +39,22 @@ func CmdReplaceDepositForBurn() *cobra.Command {
 				return err
 			}
 
+			destinationCaller, err := parseAddress(args[2])
+			if err != nil {
+				return fmt.Errorf("invalid destination caller: %w", err)
+			}
+
+			mintRecipient, err := parseAddress(args[3])
+			if err != nil {
+				return fmt.Errorf("invalid mint recipient: %w", err)
+			}
+
 			msg := &types.MsgReplaceDepositForBurn{
 				From:                 clientCtx.GetFromAddress().String(),
-				OriginalMessage:      []byte(args[0]),
-				OriginalAttestation:  []byte(args[1]),
-				NewDestinationCaller: []byte(args[2]),
-				NewMintRecipient:     []byte(args[3]),
+				OriginalMessage:      common.FromHex(args[0]),
+				OriginalAttestation:  common.FromHex(args[1]),
+				NewDestinationCaller: destinationCaller,
+				NewMintRecipient:     mintRecipient,
 			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)

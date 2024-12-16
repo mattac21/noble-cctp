@@ -24,6 +24,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
 
@@ -53,7 +54,7 @@ func CmdSendMessage() *cobra.Command {
 				From:              clientCtx.GetFromAddress().String(),
 				DestinationDomain: uint32(destinationDomain),
 				Recipient:         recipient,
-				MessageBody:       []byte(args[2]),
+				MessageBody:       common.FromHex(args[2]),
 			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
